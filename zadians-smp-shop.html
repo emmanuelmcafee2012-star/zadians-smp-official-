@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zadians SMP — Official Shop Site</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --void: #120a24;
+    --void-2: #1c0f38;
+    --enchant: #7b2ff7;
+    --enchant-2: #a463ff;
+    --glow: #c9a6ff;
+    --gold: #f7c948;
+    --ink: #e9def9;
+    --ink-dim: #b9a4d9;
+    --danger: #ff5d7a;
+    --ok: #6ee7a8;
+    --panel: rgba(30, 16, 58, 0.72);
+    --line: rgba(196, 158, 255, 0.18);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:'Rubik', sans-serif;
+    color:var(--ink);
+    background: radial-gradient(ellipse at 20% -10%, #34176b 0%, transparent 55%),
+                radial-gradient(ellipse at 100% 10%, #2a1256 0%, transparent 50%),
+                linear-gradient(180deg, var(--void) 0%, var(--void-2) 45%, #0d0620 100%);
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001s !important; animation-iteration-count:1 !important; transition-duration:0.001s !important;}
+  }
+
+  /* ---------- Crossed sword & pickaxe watermark ---------- */
+  .rune-field{
+    position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .rune-field svg{
+    position:absolute;
+    top:50%; left:50%;
+    width:min(115vw, 1400px);
+    height:auto;
+    transform:translate(-50%,-50%);
+    opacity:0.14;
+    filter:drop-shadow(0 0 40px rgba(164,99,255,0.55));
+    animation: breathe 7s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{opacity:0.10; filter:drop-shadow(0 0 25px rgba(164,99,255,0.35));}
+    50%{opacity:0.20; filter:drop-shadow(0 0 55px rgba(164,99,255,0.65));}
+  }
+  .rune-field::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(2px 2px at 15% 25%, var(--glow), transparent),
+      radial-gradient(2px 2px at 80% 15%, var(--glow), transparent),
+      radial-gradient(1.5px 1.5px at 65% 70%, var(--enchant-2), transparent),
+      radial-gradient(1.5px 1.5px at 30% 80%, var(--glow), transparent),
+      radial-gradient(2px 2px at 90% 60%, var(--enchant-2), transparent),
+      radial-gradient(1.5px 1.5px at 45% 40%, var(--glow), transparent);
+    opacity:0.5;
+  }
+
+  /* ---------- layout shell ---------- */
+  .shell{position:relative; z-index:1;}
+
+  header.topbar{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px clamp(16px,4vw,48px);
+    background:rgba(15,8,32,0.78);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:34px; height:34px; flex:none;
+  }
+  .brand-text{
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--ink);
+    line-height:1.5;
+  }
+  .brand-text span{color:var(--glow);}
+
+  nav.pages{display:flex; gap:4px; align-items:center;}
+  nav.pages button{
+    font-family:'Rubik', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink-dim);
+    background:transparent;
+    border:1px solid transparent;
+    padding:9px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:all 0.15s ease;
+    letter-spacing:0.2px;
+  }
+  nav.pages button:hover{color:var(--ink); background:rgba(123,47,247,0.15);}
+  nav.pages button.active{
+    color:#fff;
+    background:linear-gradient(135deg, var(--enchant), var(--enchant-2));
+    border-color:rgba(255,255,255,0.15);
+    box-shadow:0 0 18px rgba(123,47,247,0.55);
+  }
+  nav.pages button:focus-visible, button:focus-visible, a:focus-visible{
+    outline:2px solid var(--glow); outline-offset:2px;
+  }
+  .cart-btn{position:relative;}
+  .cart-count{
+    position:absolute; top:2px; right:4px;
+    background:var(--gold); color:#3a2500;
+    font-size:10px; font-weight:800;
+    min-width:16px; height:16px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 3px;
+  }
+
+  main{max-width:1180px; margin:0 auto; padding:48px clamp(16px,4vw,48px) 96px;}
+  .page{display:none; animation:rise 0.5s ease both;}
+  .page.active{display:block;}
+  @keyframes rise{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- home ---------- */
+  .hero{
+    text-align:center;
+    padding:64px 16px 40px;
+  }
+  .eyebrow{
+    font-family:'Press Start 2P', monospace;
+    font-size:10px; color:var(--gold);
+    letter-spacing:2px;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(22px, 5vw, 40px);
+    line-height:1.6;
+    background:linear-gradient(135deg,#fff, var(--glow) 60%, var(--enchant-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(164,99,255,0.35);
+    margin-bottom:22px;
+  }
+  .hero p{
+    max-width:560px; margin:0 auto 34px;
+    color:var(--ink-dim); font-size:16px; line-height:1.7;
+  }
+  .hero .cta{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:16px 30px;
+    background:linear-gradient(135deg, var(--enchant), var(--enchant-2));
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:12px;
+    color:#fff; font-weight:700; font-size:15px;
+    cursor:pointer;
+    box-shadow:0 8px 30px rgba(123,47,247,0.45);
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .hero .cta:hover{transform:translateY(-2px); box-shadow:0 12px 36px rgba(123,47,247,0.6);}
+
+  .home-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+    margin-top:20px;
+  }
+  @media (max-width:820px){.home-grid{grid-template-columns:1fr;}}
+  .home-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+  }
+  .home-card h3{font-size:15px; margin-bottom:8px; color:#fff;}
+  .home-card p{font-size:13.5px; color:var(--ink-dim); line-height:1.6;}
+
+  /* ---------- section headers ---------- */
+  .section-head{margin-bottom:32px;}
+  .section-head .eyebrow{margin-bottom:10px; text-align:left;}
+  .section-head h2{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(16px,3vw,22px);
+    color:#fff; line-height:1.6; margin-bottom:10px;
+  }
+  .section-head p{color:var(--ink-dim); font-size:14.5px; max-width:640px;}
+
+  /* ---------- crates ---------- */
+  .crate-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:22px;
+  }
+  @media (max-width:900px){.crate-grid{grid-template-columns:1fr;}}
+
+  .crate-card{
+    position:relative;
+    background:linear-gradient(180deg, rgba(48,22,92,0.65), rgba(20,10,40,0.75));
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px;
+    display:flex; flex-direction:column; gap:16px;
+    transition:transform 0.2s ease, border-color 0.2s ease;
+  }
+  .crate-card:hover{transform:translateY(-4px); border-color:var(--enchant-2);}
+  .crate-card.legendary{border-color:rgba(247,201,72,0.5);}
+  .crate-card.legendary:hover{border-color:var(--gold);}
+
+  .crate-top{display:flex; align-items:center; justify-content:space-between;}
+  .crate-tier{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px; letter-spacing:1px;
+    padding:6px 10px; border-radius:6px;
+  }
+  .tier-common{background:rgba(158,158,180,0.2); color:#c9c6d8;}
+  .tier-rare{background:rgba(123,47,247,0.25); color:var(--glow);}
+  .tier-legendary{background:rgba(247,201,72,0.2); color:var(--gold);}
+  .tier-op{background:rgba(255,90,54,0.22); color:#ff9466;}
+
+  .crate-card.op{border-color:rgba(255,90,54,0.45);}
+  .crate-card.op:hover{border-color:#ff5a36; box-shadow:0 10px 30px rgba(255,90,54,0.18);}
+  .crate-card.op .kq-fill{background:linear-gradient(90deg, #ff5a36, #ffb066);}
+  .tool-timer{
+    text-align:center; font-size:11.5px; font-weight:700; color:#ff9466;
+    background:rgba(255,90,54,0.12); border:1px solid rgba(255,90,54,0.3);
+    padding:6px 10px; border-radius:8px;
+  }
+
+  .crate-icon{
+    width:64px; height:64px; margin:4px auto;
+  }
+  .crate-name{font-size:19px; font-weight:800; color:#fff; text-align:center;}
+  .crate-price{
+    text-align:center; font-size:22px; font-weight:800; color:var(--gold);
+  }
+  .crate-price span{font-size:12px; color:var(--ink-dim); font-weight:500;}
+
+  .key-quality{margin-top:2px;}
+  .kq-label{
+    display:flex; justify-content:space-between; font-size:12px; color:var(--ink-dim); margin-bottom:6px;
+  }
+  .kq-bar{height:8px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden;}
+  .kq-fill{height:100%; border-radius:6px; background:linear-gradient(90deg, var(--enchant), var(--glow));}
+  .tier-legendary + .crate-icon ~ .key-quality .kq-fill{background:linear-gradient(90deg, var(--gold), #fff3c4);}
+
+  .crate-pool{font-size:12.5px; color:var(--ink-dim); line-height:1.7;}
+  .crate-pool b{color:var(--ink); font-weight:600;}
+
+  .add-btn{
+    margin-top:auto;
+    padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15);
+    background:rgba(123,47,247,0.18);
+    color:#fff; font-weight:700; font-size:13.5px; cursor:pointer;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+  .add-btn:hover{background:linear-gradient(135deg, var(--enchant), var(--enchant-2));}
+  .add-btn:active{transform:scale(0.98);}
+
+  /* ---------- effects ---------- */
+  .effects-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px;
+  }
+  .effect-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .effect-icon{
+    width:42px; height:42px; flex:none; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, rgba(123,47,247,0.35), rgba(164,99,255,0.15));
+    border:1px solid var(--line);
+    font-size:20px;
+  }
+  .effect-name{font-weight:700; font-size:15px; color:#fff; margin-bottom:3px;}
+  .effect-meta{font-size:12px; color:var(--ink-dim);}
+  .effect-dur{
+    display:inline-block; margin-top:6px;
+    font-size:11.5px; font-weight:700; color:var(--gold);
+    background:rgba(247,201,72,0.12);
+    padding:3px 8px; border-radius:6px;
+  }
+  .effect-source{font-size:11px; color:var(--ink-dim); margin-top:6px;}
+
+  /* ---------- checkout ---------- */
+  .checkout-grid{
+    display:grid; grid-template-columns:1.5fr 1fr; gap:28px; align-items:start;
+  }
+  @media (max-width:860px){.checkout-grid{grid-template-columns:1fr;}}
+
+  .cart-panel, .summary-panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px;
+  }
+  .cart-panel h3, .summary-panel h3{font-size:14px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;}
+
+  .cart-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 0; border-bottom:1px solid var(--line);
+    gap:10px;
+  }
+  .cart-row:last-child{border-bottom:none;}
+  .cart-item-info{display:flex; align-items:center; gap:12px;}
+  .cart-item-icon{width:36px; height:36px; flex:none;}
+  .cart-item-name{font-weight:700; font-size:14.5px; color:#fff;}
+  .cart-item-sub{font-size:12px; color:var(--ink-dim);}
+  .cart-item-price{font-weight:700; color:var(--gold); font-size:14px; white-space:nowrap;}
+  .remove-btn{
+    background:transparent; border:1px solid var(--line); color:var(--danger);
+    border-radius:8px; width:28px; height:28px; cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .remove-btn:hover{background:rgba(255,93,122,0.12); border-color:var(--danger);}
+
+  .empty-cart{text-align:center; padding:30px 10px; color:var(--ink-dim); font-size:14px;}
+
+  .summary-line{display:flex; justify-content:space-between; font-size:14px; color:var(--ink-dim); margin-bottom:10px;}
+  .summary-total{
+    display:flex; justify-content:space-between; font-size:18px; font-weight:800; color:#fff;
+    margin-top:14px; padding-top:14px; border-top:1px solid var(--line);
+  }
+  .summary-total span:last-child{color:var(--gold);}
+
+  .pay-methods{margin-top:20px; display:flex; flex-direction:column; gap:10px;}
+  .pay-option{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 14px; border-radius:10px;
+    border:1px solid var(--line); background:rgba(255,255,255,0.02);
+    cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .pay-option:hover{border-color:var(--enchant-2);}
+  .pay-option.selected{border-color:var(--enchant-2); background:rgba(123,47,247,0.16); box-shadow:0 0 0 1px var(--enchant-2) inset;}
+  .pay-option input{accent-color:var(--enchant-2); width:16px; height:16px;}
+  .pay-icon{font-size:18px;}
+  .pay-label{font-size:13.5px; font-weight:600; color:var(--ink);}
+
+  .checkout-btn{
+    width:100%; margin-top:20px; padding:14px; border-radius:10px; border:none;
+    background:linear-gradient(135deg, var(--enchant), var(--enchant-2));
+    color:#fff; font-weight:800; font-size:14.5px; cursor:pointer;
+    box-shadow:0 8px 24px rgba(123,47,247,0.4);
+    transition:transform 0.15s ease;
+  }
+  .checkout-btn:hover:not(:disabled){transform:translateY(-2px);}
+  .checkout-btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+  .confirm-box{
+    display:none; margin-top:16px; padding:14px; border-radius:10px;
+    background:rgba(110,231,168,0.12); border:1px solid rgba(110,231,168,0.4);
+    color:var(--ok); font-size:13.5px; font-weight:600; text-align:center;
+  }
+  .confirm-box.show{display:block; animation:rise 0.4s ease both;}
+
+  footer{
+    text-align:center; padding:26px; color:var(--ink-dim); font-size:12px;
+    border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<div class="rune-field">
+  <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#c9a6ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <!-- sword: blade top-left to bottom-right -->
+      <line x1="40" y1="40" x2="300" y2="300" stroke-width="10"/>
+      <path d="M40 40 L70 40 L70 70 L40 70 Z" fill="#c9a6ff" stroke="none"/>
+      <line x1="270" y1="270" x2="330" y2="330" stroke-width="14"/>
+      <line x1="290" y1="250" x2="330" y2="290" stroke-width="10"/>
+      <line x1="335" y1="335" x2="360" y2="360" stroke-width="16" stroke-linecap="round"/>
+      <!-- pickaxe: handle top-right to bottom-left -->
+      <line x1="360" y1="40" x2="100" y2="300" stroke-width="10"/>
+      <path d="M330 30 Q360 10 380 40 Q400 70 360 80 Q320 90 300 60 Q290 40 330 30 Z" fill="#a463ff" stroke="none"/>
+      <line x1="90" y1="310" x2="60" y2="340" stroke-width="14" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="8" width="48" height="48" rx="10" fill="url(#g1)"/>
+        <path d="M18 18 L46 46 M46 18 L18 46" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="64" y2="64">
+            <stop offset="0" stop-color="#a463ff"/>
+            <stop offset="1" stop-color="#5b1fc7"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="brand-text">ZADIANS SMP<br><span>OFFICIAL SHOP SITE</span></div>
+    </div>
+    <nav class="pages">
+      <button data-page="home" class="active">Home</button>
+      <button data-page="crates">Mystery Crates</button>
+      <button data-page="effects">Effects</button>
+      <button data-page="optools">OP Tools</button>
+      <button data-page="checkout" class="cart-btn">Checkout<span class="cart-count" id="cartCount" style="display:none;">0</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="eyebrow">OFFICIAL SHOP SITE — SERVER STORE</div>
+        <h1>ZADIANS SMP<br>OFFICIAL SHOP SITE</h1>
+        <p>Open a crate, roll the odds, and walk away with gear or a timed effect that turns the next hour of the SMP in your favor.</p>
+        <button class="cta" data-goto="crates">Browse Crates →</button>
+      </div>
+      <div class="home-grid">
+        <div class="home-card">
+          <h3>🔑 Key Quality</h3>
+          <p>Every crate lists a key quality rating. Better keys weight the odds toward the strongest effects and rarest drops inside that crate.</p>
+        </div>
+        <div class="home-card">
+          <h3>⏱️ Timed Effects</h3>
+          <p>Potion-style effects like Haste and Strength come with a real clock. Check the Effects page before you buy to know what you're playing for.</p>
+        </div>
+        <div class="home-card">
+          <h3>🛒 Simple Checkout</h3>
+          <p>Add crates to your cart, pick a payment method, and confirm. Your cart total updates live as you shop.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRATES -->
+    <section class="page" id="page-crates">
+      <div class="section-head">
+        <div class="eyebrow">STEP 1</div>
+        <h2>Mystery Crates</h2>
+        <p>Three tiers, three key qualities. The higher the key quality, the better your odds at the top-end effects in that crate's pool.</p>
+      </div>
+      <div class="crate-grid" id="crateGrid"></div>
+    </section>
+
+    <!-- EFFECTS -->
+    <section class="page" id="page-effects">
+      <div class="section-head">
+        <div class="eyebrow">STEP 2</div>
+        <h2>Effects You Can Pull</h2>
+        <p>Every effect below shows its duration and which crate pool it drops from, so you know exactly what you're rolling for.</p>
+      </div>
+      <div class="effects-grid" id="effectsGrid"></div>
+    </section>
+
+    <!-- OP TOOLS -->
+    <section class="page" id="page-optools">
+      <div class="section-head">
+        <div class="eyebrow">STEP 3 — NO RNG, JUST POWER</div>
+        <h2>OP Tools</h2>
+        <p>No crate odds here — buy the tool outright. Every OP tool runs on a 24 hour timer from the moment you claim it.</p>
+      </div>
+      <div class="crate-grid" id="opGrid"></div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section class="page" id="page-checkout">
+      <div class="section-head">
+        <div class="eyebrow">STEP 4</div>
+        <h2>Checkout</h2>
+        <p>Review what's in your cart, choose how you want to pay, and confirm your order.</p>
+      </div>
+      <div class="checkout-grid">
+        <div class="cart-panel">
+          <h3>Your Cart</h3>
+          <div id="cartList"></div>
+        </div>
+        <div class="summary-panel">
+          <h3>Order Summary</h3>
+          <div class="summary-line"><span>Items</span><span id="sumItems">0</span></div>
+          <div class="summary-line"><span>Subtotal</span><span id="sumSubtotal">0 coins</span></div>
+          <div class="summary-total"><span>Total</span><span id="sumTotal">0 coins</span></div>
+
+          <div class="pay-methods" id="payMethods">
+            <label class="pay-option" data-pay="cashapp">
+              <input type="radio" name="pay" value="cashapp"><span class="pay-icon">$</span><span class="pay-label">Cash App</span>
+            </label>
+            <label class="pay-option" data-pay="venmo">
+              <input type="radio" name="pay" value="venmo"><span class="pay-icon">V</span><span class="pay-label">Venmo</span>
+            </label>
+          </div>
+
+          <button class="checkout-btn" id="confirmBtn" disabled>Complete Purchase</button>
+          <div class="confirm-box" id="confirmBox">✅ Opening your payment app now — send the total to complete your order!</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Zadians SMP is a fan-made server store mockup. No real payments are processed.</footer>
+</div>
+
+<script>
+  // ---------------- Data ----------------
+  const crates = [
+    {
+      id: 'common',
+      name: 'Common Crate',
+      tier: 'common',
+      tierLabel: 'COMMON',
+      price: 2,
+      keyQuality: 60,
+      keyLabel: 'Bronze Key',
+      pool: ['Speed II', 'Fire Resistance', 'Night Vision'],
+      icon: 'sword'
+    },
+    {
+      id: 'rare',
+      name: 'Rare Crate',
+      tier: 'rare',
+      tierLabel: 'RARE',
+      price: 4,
+      keyQuality: 80,
+      keyLabel: 'Silver Key',
+      pool: ['Haste IV', 'Strength II', 'Speed II'],
+      icon: 'pickaxe'
+    },
+    {
+      id: 'legendary',
+      name: 'Legendary Crate',
+      tier: 'legendary',
+      tierLabel: 'LEGENDARY',
+      price: 6,
+      keyQuality: 98,
+      keyLabel: 'Gold Key',
+      pool: ['Regeneration II', 'Absorption II', 'Haste IV', 'Strength II'],
+      icon: 'both'
+    }
+  ];
+
+  const effects = [
+    { name: 'Haste IV', icon: '⛏️', duration: '1 hour', source: 'Rare & Legendary Crate', tier: 'rare', price: 3 },
+    { name: 'Strength II', icon: '💪', duration: '20 minutes', source: 'Rare & Legendary Crate', tier: 'rare', price: 3 },
+    { name: 'Speed II', icon: '🏃', duration: '30 minutes', source: 'Common & Rare Crate', tier: 'common', price: 1.5 },
+    { name: 'Regeneration II', icon: '❤️', duration: '15 minutes', source: 'Legendary Crate', tier: 'legendary', price: 4.5 },
+    { name: 'Fire Resistance', icon: '🔥', duration: '45 minutes', source: 'Common Crate', tier: 'common', price: 1.5 },
+    { name: 'Night Vision', icon: '🌙', duration: '1 hour', source: 'Common Crate', tier: 'common', price: 1.5 },
+    { name: 'Absorption II', icon: '🛡️', duration: '20 minutes', source: 'Legendary Crate', tier: 'legendary', price: 4.5 }
+  ];
+
+  const opTools = [
+    {
+      id: 'timber-pick',
+      name: 'Timber Axe',
+      tier: 'op',
+      tierLabel: 'OP',
+      price: 5,
+      duration: '24 hours',
+      perks: ['Insta-breaks entire trees in one hit'],
+      icon: 'axe'
+    },
+    {
+      id: 'excavator-pick',
+      name: 'Excavator Pickaxe',
+      tier: 'op',
+      tierLabel: 'OP',
+      price: 6,
+      duration: '24 hours',
+      perks: ['Breaks a 3x3 area — 9 blocks per swing'],
+      icon: 'pickaxe'
+    },
+    {
+      id: 'fortune-hoe',
+      name: 'Fortune IV Hoe',
+      tier: 'op',
+      tierLabel: 'OP',
+      price: 4,
+      duration: '24 hours',
+      perks: ['Fortune IV on every crop and block it harvests'],
+      icon: 'hoe'
+    },
+    {
+      id: 'netherite-apex-pick',
+      name: 'Netherite Apex Pickaxe',
+      tier: 'op',
+      tierLabel: 'OP',
+      price: 9,
+      duration: '24 hours',
+      perks: ['Silk Touch', 'Efficiency X', 'Unbreaking V'],
+      icon: 'both'
+    }
+  ];
+
+  // ---------------- State ----------------
+  let cart = []; // array of item ids (crates or tools)
+  let selectedPay = null;
+
+  // ---------------- Your payment handles ----------------
+  // Fill these in with your real Cash App cashtag and Venmo username
+  // Example: cashtag: 'YourCashtag', venmo: 'YourVenmoUsername'
+  const PAYMENT_HANDLES = {
+    cashtag: 'ZadianSmp',   // no $ sign, e.g. 'zadians'
+    venmo: 'Emmanuel-Mcafee-1'
+  };
+
+  // ---------------- Combined item lookup (crates + tools) ----------------
+  const itemsById = {};
+  [...crates, ...opTools].forEach(item => { itemsById[item.id] = item; });
+
+  // ---------------- Icons ----------------
+  function iconSvg(kind){
+    if(kind === 'sword'){
+      return `<svg viewBox="0 0 64 64" width="100%" height="100%"><g stroke="#e9def9" stroke-width="5" stroke-linecap="round"><line x1="12" y1="12" x2="46" y2="46"/><line x1="40" y1="40" x2="52" y2="52" stroke-width="8"/></g><rect x="8" y="8" width="10" height="10" fill="#a463ff"/></svg>`;
+    }
+    if(kind === 'pickaxe'){
+      return `<svg viewBox="0 0 64 64" width="100%" height="100%"><g stroke="#e9def9" stroke-width="5" stroke-linecap="round"><line x1="52" y1="12" x2="18" y2="46"/></g><path d="M46 6 Q58 4 60 16 Q62 28 50 26 Q40 24 38 14 Q37 8 46 6Z" fill="#f7c948"/></svg>`;
+    }
+    if(kind === 'axe'){
+      return `<svg viewBox="0 0 64 64" width="100%" height="100%"><g stroke="#e9def9" stroke-width="5" stroke-linecap="round"><line x1="46" y1="18" x2="14" y2="50"/></g><path d="M40 4 Q60 2 60 18 Q60 32 44 28 Q34 25 32 15 Q31 8 40 4Z" fill="#ff9466"/></svg>`;
+    }
+    if(kind === 'hoe'){
+      return `<svg viewBox="0 0 64 64" width="100%" height="100%"><g stroke="#e9def9" stroke-width="5" stroke-linecap="round"><line x1="46" y1="18" x2="16" y2="48"/></g><rect x="34" y="4" width="22" height="10" rx="2" fill="#ff9466" transform="rotate(45 45 9)"/></svg>`;
+    }
+    return `<svg viewBox="0 0 64 64" width="100%" height="100%"><g stroke="#e9def9" stroke-width="4" stroke-linecap="round"><line x1="10" y1="10" x2="54" y2="54"/><line x1="54" y1="10" x2="10" y2="54"/></g><rect x="6" y="6" width="8" height="8" fill="#a463ff"/><path d="M48 4 Q58 3 59 13 Q60 22 50 21 Q43 20 42 12 Q41 6 48 4Z" fill="#f7c948"/></svg>`;
+  }
+
+  // ---------------- Render: Crates ----------------
+  function renderCrates(){
+    const grid = document.getElementById('crateGrid');
+    grid.innerHTML = crates.map(c => `
+      <div class="crate-card ${c.tier}">
+        <div class="crate-top">
+          <span class="crate-tier tier-${c.tier}">${c.tierLabel}</span>
+          <span class="crate-tier tier-${c.tier}">${c.keyLabel}</span>
+        </div>
+        <div class="crate-icon">${iconSvg(c.icon)}</div>
+        <div class="crate-name">${c.name}</div>
+        <div class="crate-price">$${c.price.toFixed(2)}</div>
+        <div class="key-quality">
+          <div class="kq-label"><span>Key Quality</span><span>${c.keyQuality}%</span></div>
+          <div class="kq-bar"><div class="kq-fill" style="width:${c.keyQuality}%"></div></div>
+        </div>
+        <div class="crate-pool"><b>Possible effects:</b> ${c.pool.join(', ')}</div>
+        <button class="add-btn" data-add="${c.id}">Add to Cart — $${c.price.toFixed(2)}</button>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('[data-add]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        cart.push(btn.getAttribute('data-add'));
+        updateCartUI();
+      });
+    });
+  }
+
+  // ---------------- Render: OP Tools ----------------
+  function renderOpTools(){
+    const grid = document.getElementById('opGrid');
+    grid.innerHTML = opTools.map(t => `
+      <div class="crate-card op">
+        <div class="crate-top">
+          <span class="crate-tier tier-op">${t.tierLabel}</span>
+          <span class="crate-tier tier-op">${t.duration} timer</span>
+        </div>
+        <div class="crate-icon">${iconSvg(t.icon)}</div>
+        <div class="crate-name">${t.name}</div>
+        <div class="crate-price">$${t.price.toFixed(2)}</div>
+        <div class="tool-timer">⏱️ Lasts ${t.duration} from claim</div>
+        <div class="crate-pool"><b>What it does:</b> ${t.perks.join(', ')}</div>
+        <button class="add-btn" data-add="${t.id}">Add to Cart — $${t.price.toFixed(2)}</button>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('[data-add]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        cart.push(btn.getAttribute('data-add'));
+        updateCartUI();
+      });
+    });
+  }
+
+  // ---------------- Render: Effects ----------------
+  function renderEffects(){
+    const grid = document.getElementById('effectsGrid');
+    grid.innerHTML = effects.map(e => `
+      <div class="effect-card">
+        <div class="effect-icon">${e.icon}</div>
+        <div>
+          <div class="effect-name">${e.name}</div>
+          <span class="effect-dur">${e.duration}</span>
+          <span class="effect-dur" style="margin-left:6px; color:var(--glow); background:rgba(164,99,255,0.14);">$${e.price.toFixed(2)}</span>
+          <div class="effect-source">${e.source}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---------------- Cart / Checkout ----------------
+  function updateCartUI(){
+    const countEl = document.getElementById('cartCount');
+    countEl.textContent = cart.length;
+    countEl.style.display = cart.length ? 'flex' : 'none';
+
+    const listEl = document.getElementById('cartList');
+    if(cart.length === 0){
+      listEl.innerHTML = `<div class="empty-cart">Your cart is empty. Head to Mystery Crates to add some.</div>`;
+    } else {
+      listEl.innerHTML = cart.map((id, idx) => {
+        const c = itemsById[id];
+        return `
+          <div class="cart-row">
+            <div class="cart-item-info">
+              <div class="cart-item-icon">${iconSvg(c.icon)}</div>
+              <div>
+                <div class="cart-item-name">${c.name}</div>
+                <div class="cart-item-sub">${c.keyLabel} · ${c.keyQuality}% quality</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="cart-item-price">$${c.price.toFixed(2)}</div>
+              <button class="remove-btn" data-remove="${idx}">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cart.splice(Number(btn.getAttribute('data-remove')), 1);
+          updateCartUI();
+        });
+      });
+    }
+
+    const total = cart.reduce((sum, id) => sum + itemsById[id].price, 0);
+    document.getElementById('sumItems').textContent = cart.length;
+    document.getElementById('sumSubtotal').textContent = '$' + total.toFixed(2);
+    document.getElementById('sumTotal').textContent = '$' + total.toFixed(2);
+
+    refreshCheckoutBtn();
+  }
+
+  function refreshCheckoutBtn(){
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = !(cart.length > 0 && selectedPay);
+  }
+
+  document.querySelectorAll('.pay-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      opt.querySelector('input').checked = true;
+      selectedPay = opt.getAttribute('data-pay');
+      refreshCheckoutBtn();
+    });
+  });
+
+  document.getElementById('confirmBtn').addEventListener('click', () => {
+    if(cart.length === 0 || !selectedPay) return;
+    const total = cart.reduce((sum, id) => sum + itemsById[id].price, 0).toFixed(2);
+
+    let payUrl = null;
+    if(selectedPay === 'cashapp'){
+      payUrl = `https://cash.app/$${PAYMENT_HANDLES.cashtag}/${total}`;
+    } else if(selectedPay === 'venmo'){
+      payUrl = `https://venmo.com/${PAYMENT_HANDLES.venmo}?txn=pay&amount=${total}&note=Zadians%20SMP%20order`;
+    }
+
+    if(payUrl){
+      window.open(payUrl, '_blank');
+    }
+
+    const box = document.getElementById('confirmBox');
+    box.classList.add('show');
+    cart = [];
+    selectedPay = null;
+    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.pay-option input').forEach(i => i.checked = false);
+    updateCartUI();
+    setTimeout(() => box.classList.remove('show'), 4000);
+  });
+
+  // ---------------- Navigation ----------------
+  function goTo(pageId){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + pageId).classList.add('active');
+    document.querySelectorAll('nav.pages button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`nav.pages button[data-page="${pageId}"]`).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.querySelectorAll('nav.pages button[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => goTo(btn.getAttribute('data-page')));
+  });
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', () => goTo(btn.getAttribute('data-goto')));
+  });
+
+  // ---------------- Init ----------------
+  renderCrates();
+  renderOpTools();
+  renderEffects();
+  updateCartUI();
+</script>
+
+</body>
+</html>
